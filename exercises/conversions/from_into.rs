@@ -13,8 +13,7 @@ struct Person {
     age: usize,
 }
 
-// We implement the Default trait to use it as a fallback
-// when the provided string is not convertible into a Person object
+// Implement the Default trait for Person
 impl Default for Person {
     fn default() -> Person {
         Person {
@@ -24,26 +23,40 @@ impl Default for Person {
     }
 }
 
-// Your task is to complete this implementation in order for the line `let p =
-// Person::from("Mark,20")` to compile Please note that you'll need to parse the
-// age component into a `usize` with something like `"4".parse::<usize>()`. The
-// outcome of this needs to be handled appropriately.
-//
-// Steps:
-// 1. If the length of the provided string is 0, then return the default of
-//    Person.
-// 2. Split the given string on the commas present in it.
-// 3. Extract the first element from the split operation and use it as the name.
-// 4. If the name is empty, then return the default of Person.
-// 5. Extract the other element from the split operation and parse it into a
-//    `usize` as the age.
-// If while parsing the age, something goes wrong, then return the default of
-// Person Otherwise, then return an instantiated Person object with the results
-
-// I AM NOT DONE
-
+// Implement the From<&str> trait for Person
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        // Step 1: If the string is empty, return the default Person
+        if s.is_empty() {
+            return Person::default();
+        }
+
+        // Step 2: Split the string on commas
+        let parts: Vec<&str> = s.split(',').collect();
+
+        // Step 3: Ensure there are exactly two parts (name and age)
+        if parts.len() != 2 {
+            return Person::default();
+        }
+
+        // Step 4: Extract the name and validate it
+        let name = parts[0].trim();
+        if name.is_empty() {
+            return Person::default();
+        }
+
+        // Step 5: Parse the age and handle errors
+        let age_result = parts[1].trim().parse::<usize>();
+        let age = match age_result {
+            Ok(age) => age,
+            Err(_) => return Person::default(),
+        };
+
+        // If everything is valid, return the instantiated Person
+        Person {
+            name: name.to_string(),
+            age,
+        }
     }
 }
 

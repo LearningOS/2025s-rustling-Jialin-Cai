@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +23,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![T::default()], // index 0 is unused
             comparator,
         }
     }
@@ -37,7 +37,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // Insert at the end of the heap
+        self.items.push(value);
+        self.count += 1;
+        let mut idx = self.count;
+        
+        // Bubble up to restore heap property
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +71,38 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right <= self.count
+            && (self.comparator)(&self.items[right], &self.items[left])
+        {
+            right
+        } else {
+            left
+        }
+    }
+
+    fn bubble_down(&mut self, idx: usize) {
+        let mut idx = idx;
+        loop {
+            let mut smallest = idx;
+            if self.left_child_idx(idx) <= self.count
+                && (self.comparator)(&self.items[self.left_child_idx(idx)], &self.items[smallest])
+            {
+                smallest = self.left_child_idx(idx);
+            }
+            if self.right_child_idx(idx) <= self.count
+                && (self.comparator)(&self.items[self.right_child_idx(idx)], &self.items[smallest])
+            {
+                smallest = self.right_child_idx(idx);
+            }
+
+            if smallest == idx {
+                break;
+            }
+            self.items.swap(idx, smallest);
+            idx = smallest;
+        }
     }
 }
 
@@ -84,8 +128,21 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        // Swap the first element with the last and "pop" the last element
+        self.items.swap(1, self.count);
+        self.count -= 1;
+        let result = self.items.pop();
+
+        // Restore the heap property after removal
+        if self.count > 0 {
+            self.bubble_down(1);
+        }
+
+        result
     }
 }
 
